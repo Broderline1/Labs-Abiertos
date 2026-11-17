@@ -6,7 +6,7 @@ const MATERIAS={EstrucDatos:"Estructura de Datos",ComHabDig:"Com. y Habilidades 
 // Formato: "bloque|materia|grupo|profe". Un arreglo por día (Lu..Vie).
 const LABS=[
  {id:"1103",nombre:"Lab. Pruebas 1103",codigo:"Lab1103",d:[
-  ["2|EstrucDatos|DSM4B|JBrindis","3|EstrucDatos|DSM4B|JBrindis","4|EstrucDatos|DSM4A|Kcantú","5|Asesorias|DSM1B|"],
+  ["15|EstrucDatos|DSM4B|JBrindis","3|EstrucDatos|DSM4B|JBrindis","4|EstrucDatos|DSM4A|Kcantú","5|Asesorias|DSM1B|"],
   ["4|TutoriaGpo|DSM4A|FélixCarlos","5|AyDdS|DSM4A|FélixCarlos","6|ComHabDig|DSM1C|Kcantú","7|EstrucDatos|DSM4A|Kcantú","8|EstrucDatos|DSM4A|Kcantú"],
   ["1|ComHabDig|DSM1C|Kcantú","2|ComHabDig|DSM1C|Kcantú","3|EtiProf|DSM4A|SharinePiña","4|AyDdS|DSM4A|FélixCarlos","5|Asesorias|DSM1B|"],
   ["6|AyDdS|DSM4A|FélixCarlos","8|EstrucDatos|DSM4A|Kcantú"],
