@@ -1,0 +1,9 @@
+# CI/CD con Netlify: en cada push corre las pruebas.
+# Si fallan, el deploy se cancela y la app publicada no cambia.
+# Si pasan, versiona el caché del service worker y publica la carpeta public/.
+[build]
+  command = "npm test && sed -i \"s/labs-libres-v1/labs-libres-$COMMIT_REF/\" public/sw.js"
+  publish = "public"
+
+[build.environment]
+  NODE_VERSION = "20"
