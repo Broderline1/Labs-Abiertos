@@ -1,0 +1,50 @@
+# Pipeline de Integración y Despliegue Continuo (CI/CD)
+# - En cada push o pull request: corre las pruebas (CI)
+# - Solo en push a main y si las pruebas pasan: publica en Netlify (CD)
+name: CI/CD Labs Libres
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  pruebas:
+    name: Pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Correr pruebas
+        run: npm test
+
+  despliegue:
+    name: Despliegue a Netlify
+    needs: pruebas
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Cambia la versión del caché para que los celulares descarguen la versión nueva
+      - name: Versionar caché del service worker
+        run: sed -i "s/labs-libres-v1/labs-libres-${GITHUB_SHA::7}/" public/sw.js
+
+      - name: Publicar en Netlify
+        run: npx --yes netlify-cli deploy --dir=public --prod --message "Deploy ${GITHUB_SHA::7}"
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}

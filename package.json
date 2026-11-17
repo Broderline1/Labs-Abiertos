@@ -1,0 +1,10 @@
+{
+  "name": "labs-libres-pwa",
+  "version": "1.0.0",
+  "description": "PWA que muestra qué laboratorio de TIC de la UTS está libre en cada bloque",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "start": "npx serve public"
+  }
+}

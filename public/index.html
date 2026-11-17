@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f7a4a">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui}[hidden]{display:none!important}</style>
+<title>Labs Libres UTS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: barra de "ahora" arriba, selector día/bloque, tarjetas por lab, luego la matriz del día */
+:root{
+  --bg:#f3f6f4; --surface:#ffffff; --fg:#14231c; --muted:#5b6d64; --line:#d7e1db;
+  --brand:#0f7a4a; --brand-ink:#ffffff;
+  --free:#0f7a4a; --free-bg:#dff2e7; --busy:#9a4a12; --busy-bg:#f8e8dc; --soon:#8a6a00; --soon-bg:#f8efcc;
+  --display:"Familjen Grotesk",system-ui,sans-serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1612; --surface:#16211b; --fg:#e4eee8; --muted:#94a89d; --line:#2a3a31;
+  --brand:#3fbf80; --brand-ink:#08130d;
+  --free:#5fd497; --free-bg:#173426; --busy:#f0a26c; --busy-bg:#3a2417; --soon:#e8c95a; --soon-bg:#33290f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1612; --surface:#16211b; --fg:#e4eee8; --muted:#94a89d; --line:#2a3a31;
+  --brand:#3fbf80; --brand-ink:#08130d;
+  --free:#5fd497; --free-bg:#173426; --busy:#f0a26c; --busy-bg:#3a2417; --soon:#e8c95a; --soon-bg:#33290f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px;display:flex;flex-direction:column;gap:22px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,5vw,38px);margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:2px 0 0}
+.now{font-family:var(--mono);font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.now b{color:var(--brand)}
+.controls{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.lbl{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);min-width:56px}
+button{font:inherit;cursor:pointer}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:8px;padding:6px 11px;font-size:14px}
+.chip[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);font-weight:600}
+.chip.mono{font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums}
+.chip:focus-visible,.bell:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.link{background:none;border:0;color:var(--brand);text-decoration:underline;padding:4px 2px;font-size:14px}
+.slot{font-family:var(--display);font-size:20px;margin:0}
+.slot span{font-family:var(--mono);font-size:14px;color:var(--muted);font-weight:500;margin-left:6px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card h3{font-family:var(--display);font-size:18px;margin:0;font-weight:700}
+.card .code{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.pill{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.pill.free{background:var(--free-bg);color:var(--free)}
+.pill.busy{background:var(--busy-bg);color:var(--busy)}
+.pill.soon{background:var(--soon-bg);color:var(--soon)}
+.card .who{font-size:14px}
+.card .who strong{font-weight:600}
+.card .until{font-size:13px;color:var(--muted)}
+.card.free{border-color:color-mix(in srgb,var(--free) 45%,var(--line))}
+.bell{align-self:flex-start;border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:8px;padding:5px 10px;font-size:13px}
+.bell[aria-pressed="true"]{background:var(--soon-bg);color:var(--soon);border-color:transparent;font-weight:600}
+h2{font-family:var(--display);font-size:20px;margin:0}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:12.5px}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{font-weight:600;font-size:12px;color:var(--muted);background:var(--bg)}
+td.t{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap;font-size:12px}
+td.t b{color:var(--fg)}
+td.b{background:var(--busy-bg);color:var(--fg)}
+td.f{color:var(--free);font-weight:500}
+td.b small{display:block;color:var(--muted)}
+tr.cur td{box-shadow:inset 0 2px 0 var(--brand),inset 0 -2px 0 var(--brand)}
+.note{font-size:13px;color:var(--muted);margin:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.25)}
+@media (prefers-reduced-motion:no-preference){.card{transition:border-color .2s}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Labs Libres</h1>
+      <p class="sub">UTS · Laboratorios de TIC, bloque por bloque</p>
+    </div>
+    <div class="now" id="now">—</div>
+  </header>
+
+  <section class="controls" aria-label="Elegir día y hora">
+    <div class="row"><span class="lbl">Día</span><div class="row" id="days"></div></div>
+    <div class="row"><span class="lbl">Bloque</span><div class="row" id="blocks"></div></div>
+    <div class="row"><button class="link" id="goNow" type="button">Volver a ahorita</button></div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <p class="slot" id="slot"></p>
+    <div class="cards" id="cards"></div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:10px">
+    <h2 id="gridTitle">Todo el día</h2>
+    <div class="scroll"><table id="grid"></table></div>
+    <p class="note">Del bloque 10 (15:00) en adelante no hay clases en ningún lab, así que todos están libres.</p>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="datos.js"></script>
+<script>
+let sel=ahora(), siguiendo=true;
+const $=id=>document.getElementById(id);
+let watch=[];try{watch=JSON.parse(localStorage.getItem("watch")||"[]")}catch(e){}
+const saveWatch=()=>{try{localStorage.setItem("watch",JSON.stringify(watch))}catch(e){}};
+
+function render(){
+  const real=ahora();
+  const d=new Date();
+  $("now").innerHTML=`${DIAS[d.getDay()-1]||"Fin de semana"} · <b>${d.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"})}</b>`+(real.fuera?"":` · bloque ${real.bloque}`);
+  $("days").innerHTML=DIAS.map((n,i)=>`<button class="chip" type="button" aria-pressed="${i===sel.dia}" data-d="${i}">${n.slice(0,3)}</button>`).join("");
+  $("blocks").innerHTML=BLOQUES.slice(0,9).map((t,i)=>`<button class="chip mono" type="button" aria-pressed="${i+1===sel.bloque}" data-b="${i+1}" title="${t[0]}–${t[1]}">${t[0]}</button>`).join("")+`<button class="chip mono" type="button" aria-pressed="${sel.bloque>9}" data-b="10">15:00+</button>`;
+  const [ini,fin]=BLOQUES[sel.bloque-1];
+  const esAhora=siguiendo&&!real.fuera;
+  $("slot").innerHTML=`${esAhora?"Ahorita":DIAS[sel.dia]+", bloque "+sel.bloque}<span>${ini}–${fin}</span>`+(siguiendo&&real.fuera?`<br><span style="margin:0">${real.fuera}</span>`:"");
+  const est=LABS.map(l=>({l,s:estado(l.id,sel.dia,sel.bloque)}));
+  est.sort((a,b)=>(b.s.libre-a.s.libre)||((b.s.n||0)-(a.s.n||0)));
+  $("cards").innerHTML=est.map(({l,s})=>{
+    if(s.libre){
+      const corto=s.n===1&&!s.todoDia;
+      return `<article class="card free"><div class="top"><div><h3>${l.nombre}</h3><div class="code">${l.codigo}</div></div><span class="pill ${corto?"soon":"free"}">${corto?"Libre 1 bloque":"Libre"}</span></div>
+      <div class="until">${s.todoDia?"Libre el resto del día":`Libre hasta las ${s.hasta} (${s.n} bloque${s.n>1?"s":""})`}</div></article>`;
+    }
+    const w=watch.includes(l.id);
+    return `<article class="card"><div class="top"><div><h3>${l.nombre}</h3><div class="code">${l.codigo}</div></div><span class="pill busy">Ocupado</span></div>
+    <div class="who"><strong>${s.c.g}</strong> · ${s.c.mat}${s.c.p?`<br><span class="until">${s.c.p}</span>`:""}</div>
+    <div class="until">${s.seLibera?`Se libera a las ${s.seLibera}`:"Ocupado el resto del día"}</div>
+    ${s.seLibera?`<button class="bell" type="button" aria-pressed="${w}" data-w="${l.id}">${w?"Te aviso cuando se libere ✓":"Avísame cuando se libere"}</button>`:""}</article>`;
+  }).join("");
+  $("gridTitle").textContent="Todo el "+DIAS[sel.dia].toLowerCase();
+  let h=`<thead><tr><th>Bloque</th>${LABS.map(l=>`<th>${l.nombre}</th>`).join("")}</tr></thead><tbody>`;
+  for(let b=1;b<=9;b++){
+    h+=`<tr class="${b===sel.bloque?"cur":""}"><td class="t"><b>${b}</b> ${BLOQUES[b-1][0]}</td>`+LABS.map(l=>{const c=OC[l.id][sel.dia][b];return c?`<td class="b">${c.g}<small>${c.mat}</small></td>`:`<td class="f">Libre</td>`}).join("")+`</tr>`;
+  }
+  $("grid").innerHTML=h+"</tbody>";
+}
+
+document.addEventListener("click",e=>{
+  const t=e.target.closest("button");if(!t)return;
+  if(t.dataset.d){sel.dia=+t.dataset.d;siguiendo=false;render();}
+  else if(t.dataset.b){sel.bloque=+t.dataset.b;siguiendo=false;render();}
+  else if(t.id==="goNow"){sel=ahora();siguiendo=true;render();}
+  else if(t.dataset.w){
+    const id=t.dataset.w;
+    if(watch.includes(id)) watch=watch.filter(x=>x!==id);
+    else{watch.push(id);try{if("Notification" in window&&Notification.permission==="default")Notification.requestPermission().catch(()=>{});}catch(e){}}
+    saveWatch();render();
+  }
+});
+
+function toast(msg){const t=$("toast");t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,6000);}
+function avisar(msg){
+  toast(msg);
+  try{
+    if("Notification" in window&&Notification.permission==="granted"){
+      if(navigator.serviceWorker&&navigator.serviceWorker.controller)navigator.serviceWorker.ready.then(r=>r.showNotification("Labs Libres",{body:msg,icon:"icon-192.png"}));
+      else new Notification("Labs Libres",{body:msg});
+    }
+  }catch(e){}
+}
+// Cada 30 s: actualiza la vista y revisa si un lab que sigues ya quedó libre
+function tick(){
+  const r=ahora();
+  if(siguiendo) sel={dia:r.dia,bloque:r.bloque};
+  if(!r.fuera){
+    watch.slice().forEach(id=>{
+      if(estado(id,r.dia,r.bloque).libre){
+        avisar(`Ya se liberó el ${LABS.find(l=>l.id===id).nombre}`);
+        watch=watch.filter(x=>x!==id);saveWatch();
+      }
+    });
+  }
+  render();
+}
+tick();setInterval(tick,30000);
+try{if("serviceWorker" in navigator&&location.protocol!=="blob:")navigator.serviceWorker.register("sw.js").catch(()=>{});}catch(e){}
+</script>
+
+</body>
+</html>
